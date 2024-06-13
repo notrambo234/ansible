@@ -1,0 +1,5 @@
+---
+- hosts : Linux
+  become : true
+  roles:
+    - ./Roles/configure_dns

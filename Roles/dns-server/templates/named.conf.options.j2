@@ -1,0 +1,11 @@
+options {
+    directory "/var/cache/bind";
+    listen-on { any; };
+    allow-query { any; };
+    recursion yes;
+    forwarders {
+        8.8.8.8;  // Google's DNS server
+        8.8.4.4;  // Secondary Google's DNS server
+    };
+    dnssec-validation auto;
+};

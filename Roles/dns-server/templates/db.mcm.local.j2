@@ -1,0 +1,17 @@
+$TTL    604800
+@       IN      SOA     vm-dns.mcm.local. admin.mcm.local. (
+                              3         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+; Nameservers
+@       IN      NS      vm-dns.mcm.local.
+
+; Addresses for the canonical names
+vm-dns     IN      A       192.168.0.35
+pc-c2s     IN      A       192.168.0.21
+pc-vaio    IN      A       192.168.0.32
+vm-vpn     IN      A       192.168.0.33
+vm-wazuh   IN      A       192.168.0.36
+ansible    IN      A       192.168.0.40

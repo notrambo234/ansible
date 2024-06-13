@@ -1,0 +1,12 @@
+---
+- name : Modifier le fichier dns.conf
+  template : 
+      src: dns.conf.j2
+      dest: /etc/NetworkManager/conf.d/dns.conf
+  notify: redémarrer bind9
+
+- name : Modifier le fichier resolv.conf
+  template : 
+      src: resolv.conf.j2
+      dest: /etc/resolv.conf
+  notify: redémarrer bind9

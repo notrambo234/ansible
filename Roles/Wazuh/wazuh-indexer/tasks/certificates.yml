@@ -1,0 +1,33 @@
+---
+- name: Télecharger wazuh-certs-tools.sh
+  ansible.builtin.get_url:
+      url: "https://packages.wazuh.com/{{ wazuh_version }}/wazuh-certs-tool.sh"
+      dest: "/home/eboudi"
+      mode: '0755'
+
+- name: Télecharger config.yml
+  ansible.builtin.get_url:
+      url: "https://packages.wazuh.com/{{ wazuh_version }}/config.yml"
+      dest: "/home/eboudi"
+      mode: '0755'
+
+- name: Modification du fichier config.yml
+  template: 
+      src: config.yml.j2
+      dest: ./config.yml
+
+- name: Execution de wazuh-certs-tool.sh -A
+  ansible.builtin.shell:
+      cmd: bash ./wazuh-certs-tool.sh -A
+      chdir: ./
+
+- name: Créer une archive tar des certificats wazuh
+  ansible.builtin.command:
+     cmd: tar -cvf ./wazuh-certificates.tar -C ./wazuh-certificates/ .
+  args: 
+     chdir: ./
+
+- name: Supprimer le répertoire des certificats wazuh
+  ansible.builtin.file:
+     path: ./wazuh-certificates
+     state: absent

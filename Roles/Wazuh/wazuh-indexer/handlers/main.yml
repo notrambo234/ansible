@@ -1,0 +1,7 @@
+---
+- name: restart wazuh-indexer
+  systemd:
+     name: wazuh-indexer
+     state: restarted
+     enabled: yes
+     daemon_reload: yes

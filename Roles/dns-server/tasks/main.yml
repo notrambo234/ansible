@@ -1,0 +1,25 @@
+---
+- name : Installer BIND9
+  apt : 
+    name : bind9
+    state : latest
+    update_cache : yes
+  notify : redémarrer bind9
+
+- name : configurer le fichier named.conf.options
+  template : 
+     src : named.conf.options.j2
+     dest : /etc/bind/named.conf.options
+  notify : redémarrer bind9
+
+- name : configurer le fichier de zone pour le réseau local
+  template: 
+      src : db.mcm.local.j2
+      dest : "/etc/bind/db.mcm.local"
+  notify : redémarrer bind9
+
+- name : configurer le fichier named.conf.local
+  template : 
+       src : named.conf.local.j2
+       dest : /etc/bind/named.conf.local
+  notify : redémarrer bind9

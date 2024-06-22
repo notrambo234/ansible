@@ -1,4 +1,16 @@
 ---
+- name: Vérifier si le répertoire NetworkManager existe
+  ansible.builtin.stat:
+    path: /etc/NetworkManager/conf.d
+  register: nm_conf_dir
+
+- name: Créer le répertoire NetworkManager si non existant
+  ansible.builtin.file:
+    path: /etc/NetworkManager/conf.d
+    state: directory
+    mode: '0755'
+  when: not nm_conf_dir.stat.exists
+  
 - name : Modifier le fichier dns.conf
   template : 
       src: dns.conf.j2

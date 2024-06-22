@@ -1,0 +1,5 @@
+---
+- hosts : vm-wazuh
+  become: yes
+  roles :
+       - ./Roles/Wazuh/wazuh-indexer

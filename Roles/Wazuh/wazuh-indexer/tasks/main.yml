@@ -1,0 +1,4 @@
+---
+- include_tasks : certificates.yml
+- include_tasks : installation.yml
+- include_tasks : cluster_initialization.yml

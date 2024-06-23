@@ -1,6 +1,8 @@
 - hosts : dns_servers
-  become : yes
+  vars_files:
+    - vault.yml
   vars : 
     dns_domain : "mcm.local"
   roles :
     - ./Roles/dns-server
+  become: yes

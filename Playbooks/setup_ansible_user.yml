@@ -1,0 +1,6 @@
+---
+- hosts: all
+  become: yes
+  roles: 
+    - ./Roles/setup_ansible_user
+  

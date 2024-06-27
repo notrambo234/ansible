@@ -1,0 +1,5 @@
+---
+- hosts: vm3
+  become: yes
+  roles: 
+    - ./Roles/setup_user

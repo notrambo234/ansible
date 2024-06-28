@@ -1,7 +1,5 @@
 ---
 - hosts : vm-wazuh
-  vars_files:
-    - vault.yml
   become: yes
   roles :
        - ./Roles/Wazuh/wazuh-indexer

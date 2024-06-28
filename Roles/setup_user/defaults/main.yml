@@ -1,0 +1,4 @@
+---
+# defaults file for setup_ansible_user
+super_user: ansibleawx
+user_password_hash : $6$mysalt$XCSAt2YiOpQR770LuCsOPIk1ClybKFAQ1J5QMUSx7fCBypiRXBD3JayAWc932xNdxPRMQUFnuHNRUexFHkJ/p.

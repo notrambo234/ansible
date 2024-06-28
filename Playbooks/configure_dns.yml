@@ -1,7 +1,5 @@
 ---
-- hosts : Linux
-  vars_files:
-    - vault.yml
+- hosts : all
   become : yes
   roles:
     - ./Roles/configure_dns

@@ -29,7 +29,7 @@
 
 - name: Copy authorized_keys
   copy:
-    src: /home/eboudi/.ssh/id_rsa.pub
+    src: ~/.ssh/id_rsa.pub
     dest: /home/"{{ super_user }}"/.ssh/authorized_keys
     owner: "{{ super_user }}"
     group: "{{ super_user }}"

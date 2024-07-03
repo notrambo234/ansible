@@ -1,25 +1,28 @@
 ---
-- name : Installer BIND9
-  apt : 
-    name : bind9
-    state : latest
-    update_cache : yes
-  notify : redémarrer bind9
+- name: Installer BIND9
+  ansible.builtin.apt:
+    name: bind9
+    state: present
+    update_cache: true
+  notify: Redémarrer bind9
 
-- name : configurer le fichier named.conf.options
-  template : 
-     src : named.conf.options.j2
-     dest : /etc/bind/named.conf.options
-  notify : redémarrer bind9
+- name: Configurer le fichier named.conf.options
+  ansible.builtin.template:
+    src: named.conf.options.j2
+    dest: /etc/bind/named.conf.options
+    mode: '0644'
+  notify: Redémarrer bind9
 
-- name : configurer le fichier de zone pour le réseau local
-  template: 
-      src : db.mcm.local.j2
-      dest : "/etc/bind/db.mcm.local"
-  notify : redémarrer bind9
+- name: Configurer le fichier de zone pour le réseau local
+  ansible.builtin.template:
+    src: db.mcm.local.j2
+    dest: "/etc/bind/db.mcm.local"
+    mode: "0644"
+  notify: Redémarrer bind9
 
-- name : configurer le fichier named.conf.local
-  template : 
-       src : named.conf.local.j2
-       dest : /etc/bind/named.conf.local
-  notify : redémarrer bind9
+- name: Configurer le fichier named.conf.local
+  ansible.builtin.template:
+    src: named.conf.local.j2
+    dest: /etc/bind/named.conf.local
+    mode: "0644"
+  notify: Redémarrer bind9

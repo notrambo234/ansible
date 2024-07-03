@@ -11,23 +11,25 @@
       dest: "/home/eboudi"
       mode: '0755'
 
-- name: Modification du fichier config.yml
-  template: 
-      src: config.yml.j2
-      dest: ./config.yml
+# - name: Modification du fichier config.yml
+#   ansible.builtin.template:
+#      src: config.yml.j2
+#      dest: ./config.yml
+#      mode: "0644"
 
-- name: Execution de wazuh-certs-tool.sh -A
-  ansible.builtin.shell:
-      cmd: bash ./wazuh-certs-tool.sh -A
-      chdir: ./
+# - name: Execution de wazuh-certs-tool.sh -A
+#   ansible.builtin.command:
+#      cmd: bash ./wazuh-certs-tool.sh -A
+#      chdir: ./
+#      creates: ~/wazuh-certs-tool.sh
 
-- name: Créer une archive tar des certificats wazuh
-  ansible.builtin.command:
-     cmd: tar -cvf ./wazuh-certificates.tar -C ./wazuh-certificates/ .
-  args: 
-     chdir: ./
+# - name: Créer une archive tar des certificats wazuh
+#   ansible.builtin.command:
+#     cmd: tar -cvf ./wazuh-certificates.tar -C ./wazuh-certificates/ .
+#  args:
+#     chdir: ./
 
-- name: Supprimer le répertoire des certificats wazuh
-  ansible.builtin.file:
-     path: ./wazuh-certificates
-     state: absent
+# - name: Supprimer le répertoire des certificats wazuh
+#   ansible.builtin.file:
+#      path: ./wazuh-certificates
+#      state: absent

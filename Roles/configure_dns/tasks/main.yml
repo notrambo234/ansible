@@ -10,15 +10,17 @@
     state: directory
     mode: '0755'
   when: not nm_conf_dir.stat.exists
-  
-- name : Modifier le fichier dns.conf
-  template : 
-      src: dns.conf.j2
-      dest: /etc/NetworkManager/conf.d/dns.conf
+
+- name: Modifier le fichier dns.conf
+  ansible.builtin.template:
+    src: dns.conf.j2
+    dest: /etc/NetworkManager/conf.d/dns.conf
+    mode: 'O644s'
   notify: redémarrer bind9
 
-- name : Modifier le fichier resolv.conf
-  template : 
-      src: resolv.conf.j2
-      dest: /etc/resolv.conf
+- name: Modifier le fichier resolv.conf
+  ansible.builtin.template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    mode: '0644'
   notify: redémarrer bind9

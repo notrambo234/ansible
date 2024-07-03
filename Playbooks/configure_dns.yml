@@ -1,5 +1,6 @@
 ---
-- hosts : all
-  become : yes
+- name: Configure DNS on clients
+  hosts: all
+  become: true
   roles:
-    - ./Roles/configure_dns
+     - configure_dns

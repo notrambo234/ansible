@@ -1,6 +1,8 @@
-- hosts : dns_servers
-  vars : 
-    dns_domain : "mcm.local"
-  roles :
-    - ./Roles/dns-server
-  become: yes
+---
+- name: DNS server configuration
+  hosts: dns_servers
+  vars:
+    dns_domain: "mcm.local"
+  roles:
+    - dns-server
+  become: true

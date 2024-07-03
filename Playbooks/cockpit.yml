@@ -1,0 +1,6 @@
+---
+- name: Déployer Cockpit sur l'infra
+  hosts: all
+  become: true
+  roles:
+    - cockpit

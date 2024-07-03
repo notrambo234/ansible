@@ -1,7 +1,7 @@
 ---
-- name: restart wazuh-indexer
-  systemd:
+- name: Restart wazuh-indexer
+  ansible.builtin.systemd:
      name: wazuh-indexer
      state: restarted
-     enabled: yes
-     daemon_reload: yes
+     enabled: true
+     daemon_reload: true

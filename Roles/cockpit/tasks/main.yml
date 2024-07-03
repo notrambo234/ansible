@@ -1,0 +1,7 @@
+- name: Installer cockpit
+  ansible.builtin.apt:
+     name:
+        - cockpit
+     state: present
+     update-cache: true
+  become: true

@@ -1,5 +1,6 @@
 ---
-- hosts: vm3
-  become: yes
-  roles: 
-    - ./Roles/setup_user
+- name: Setup new user on linux VMs
+  hosts: vm3
+  become: true
+  roles:
+    - setup_user

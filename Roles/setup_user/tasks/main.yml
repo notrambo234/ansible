@@ -1,26 +1,26 @@
 ---
 - name: Create user
-  user:
+  ansible.builtin.user:
     name: "{{ super_user }}"
     password: "{{ user_password_hash }}"
     state: present
-    createhome: yes
+    createhome: true
     shell: /bin/bash
 
 - name: Add user to sudo group
-  user:
+  ansible.builtin.user:
     name: "{{ super_user }}"
     groups: sudo
-    append: yes
+    append: true
 
 - name: Allow user to run sudo without password
-  copy:
+  ansible.builtin.copy:
     dest: /etc/sudoers.d/"{{ super_user }}"
     content: '{{ super_user }} ALL=(ALL) NOPASSWD:ALL'
     mode: '0440'
 
 - name: Ensure .ssh directory exists
-  file:
+  ansible.builtin.file:
     path: /home/"{{ super_user }}"/.ssh
     state: directory
     owner: "{{ super_user }}"
@@ -28,7 +28,7 @@
     mode: '0700'
 
 - name: Copy authorized_keys
-  copy:
+  ansible.builtin.copy:
     src: ~/.ssh/id_rsa.pub
     dest: /home/"{{ super_user }}"/.ssh/authorized_keys
     owner: "{{ super_user }}"

@@ -1,0 +1,6 @@
+---
+- name: Configurer SSH et copier la clé publique
+  hosts: serveurs
+  become: yes
+  roles:
+    - ssh-setup

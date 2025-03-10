@@ -1,0 +1,26 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: S'assurer que le répertoire .ssh existe
+  file:
+    path: ~/.ssh
+    state: directory
+    mode: '0700'
+
+- name: Copier la clé SSH publique sur le client
+  authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: " {{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+- name: Désactiver l'authentification par MDP
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+  notify: restart ssh
+
+- name: Assurer que le service SSH est activé
+  service:
+    name: sshd
+    state: started
+    enabled: yes

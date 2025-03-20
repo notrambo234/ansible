@@ -10,10 +10,10 @@ nodes:
   # node, each one must have a node_type
   server:
     - name: wazuh-1
-      ip: "{{ manager_ip }}"
+      ip: "{{ indexer_ip }}"
     #  node_type: master
 
   # Wazuh dashboard nodes
   dashboard:
     - name: dashboard
-      ip: "{{ dashboard_ip }}"
+      ip: "{{ indexer_ip }}"

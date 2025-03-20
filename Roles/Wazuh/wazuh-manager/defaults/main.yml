@@ -1,0 +1,4 @@
+---
+wazuh_indexer_username: 'admin'
+wazuh_indexer_password: 'admin'
+wazuh_server_node: 'wazuh-1'

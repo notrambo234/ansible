@@ -1,35 +1,43 @@
----
-- name: Télecharger wazuh-certs-tools.sh
+- name: Vérifier si les certificats existent déjà
+  ansible.builtin.stat:
+    path: "/home/{{ user }}/wazuh-certificates.tar"
+  register: cert_archive
+
+- name: Télécharger wazuh-certs-tools.sh (si les certificats n'existent pas)
   ansible.builtin.get_url:
-      url: "https://packages.wazuh.com/{{ wazuh_version }}/wazuh-certs-tool.sh"
-      dest: "/home/eboudi"
-      mode: '0755'
+    url: "https://packages.wazuh.com/{{ wazuh_version }}/wazuh-certs-tool.sh"
+    dest: "/home/{{ user }}/wazuh-certs-tool.sh"
+    mode: "0755"
+  when: not cert_archive.stat.exists
 
-- name: Télecharger config.yml
+- name: Télécharger config.yml (si les certificats n'existent pas)
   ansible.builtin.get_url:
-      url: "https://packages.wazuh.com/{{ wazuh_version }}/config.yml"
-      dest: "/home/eboudi"
-      mode: '0755'
+    url: "https://packages.wazuh.com/{{ wazuh_version }}/config.yml"
+    dest: "/home/{{ user }}/config.yml"
+    mode: "0755"
+  when: not cert_archive.stat.exists
 
-# - name: Modification du fichier config.yml
-#   ansible.builtin.template:
-#      src: config.yml.j2
-#      dest: ./config.yml
-#      mode: "0644"
+- name: Modification du fichier config.yml (si les certificats n'existent pas)
+  ansible.builtin.template:
+    src: config.yml.j2
+    dest: "/home/{{ user }}/config.yml"
+    mode: "0644"
+  when: not cert_archive.stat.exists
 
-# - name: Execution de wazuh-certs-tool.sh -A
-#   ansible.builtin.command:
-#      cmd: bash ./wazuh-certs-tool.sh -A
-#      chdir: ./
-#      creates: ~/wazuh-certs-tool.sh
+- name: Exécuter wazuh-certs-tool.sh -A (si les certificats n'existent pas)
+  ansible.builtin.command:
+    cmd: bash /home/{{ user }}/wazuh-certs-tool.sh -A
+    chdir: /home/{{ user }}/
+  when: not cert_archive.stat.exists
 
-# - name: Créer une archive tar des certificats wazuh
-#   ansible.builtin.command:
-#     cmd: tar -cvf ./wazuh-certificates.tar -C ./wazuh-certificates/ .
-#  args:
-#     chdir: ./
+- name: Créer une archive tar des certificats Wazuh (si elle n'existe pas)
+  ansible.builtin.command:
+    cmd: tar -cvf /home/{{ user }}/wazuh-certificates.tar -C ./wazuh-certificates/ .
+    chdir: /home/{{ user }}/
+  when: not cert_archive.stat.exists
 
-# - name: Supprimer le répertoire des certificats wazuh
-#   ansible.builtin.file:
-#      path: ./wazuh-certificates
-#      state: absent
+- name: Supprimer le répertoire des certificats Wazuh après archivage (si les certificats ont été générés)
+  ansible.builtin.file:
+    path: "/home/{{ user }}/wazuh-certificates"
+    state: absent
+  when: not cert_archive.stat.exists

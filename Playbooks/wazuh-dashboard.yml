@@ -1,0 +1,6 @@
+---
+- name: Déploiement de Wazuh dashboard
+  hosts: proxmox
+  become: yes
+  roles:
+    - role: Roles/Wazuh/wazuh-dashboard

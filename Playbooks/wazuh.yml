@@ -1,0 +1,8 @@
+---
+- name: Déploiement de Wazuh Indexer et Manager
+  hosts: proxmox
+  become: yes
+  roles:
+    - role: Roles/Wazuh/wazuh-indexer
+    - role: Roles/Wazuh/wazuh-manager
+    - role: Roles/Wazuh/wazuh-dashboard

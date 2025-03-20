@@ -1,0 +1,221 @@
+---
+- name: Installation des dépendances requises
+  ansible.builtin.apt:
+    name:
+      - gnupg
+      - apt-transport-https
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Importer la clé Wazuh GPG 
+  ansible.builtin.shell: >
+    curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg
+  args:
+    creates: /usr/share/keyrings/wazuh.gpg
+  become: yes
+
+- name: Ajouter le repo Wazuh
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/wazuh.list
+    line: "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main"
+    create: yes
+  become: yes
+
+- name: Mettre à jour le cache des paquets
+  ansible.builtin.apt:
+    update_cache: yes
+  become: yes
+
+- name: Installer le wazuh-manager
+  ansible.builtin.apt:
+    name: wazuh-manager
+    state: present
+    update_cache: yes
+  notify: Restart wazuh-manager
+  become: yes
+
+- name: Installer filebeat
+  ansible.builtin.apt:
+    name: filebeat
+    state: present
+    update_cache: yes
+  notify: Restart filebeat
+  become: yes
+
+- name: Télécharger le fichier de configuration préconfiguré de Filebeat
+  ansible.builtin.get_url:
+    url: "https://packages.wazuh.com/{{ wazuh_version }}/tpl/wazuh/filebeat/filebeat.yml"
+    dest: "/etc/filebeat/filebeat.yml"
+    mode: "0644"
+  notify: Restart filebeat
+  become: yes
+
+- name: Modifier filebeat.yml avec les bonnes informations d'indexer
+  ansible.builtin.template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Restart filebeat
+  become: yes
+
+- name: Créer le filebeat keystore
+  ansible.builtin.command: filebeat keystore create --force
+  args:
+    creates: /var/lib/filebeat/keystore
+  become: yes
+
+- name: Ajouter un username au keystore Filebeat
+  ansible.builtin.shell: echo "{{ wazuh_indexer_username }}" | filebeat keystore add username --stdin --force
+  become: yes
+  notify: Restart filebeat
+
+- name: Ajouter un password au keystore Filebeat
+  ansible.builtin.shell: echo "{{ wazuh_indexer_password }}" | filebeat keystore add password --stdin --force
+  become: yes
+  notify: Restart filebeat
+
+- name: Installer le template d'alertes pour l'indexeur Wazuh
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/wazuh/wazuh/v4.11.1/extensions/elasticsearch/7.x/wazuh-template.json"
+    dest: "/etc/filebeat/wazuh-template.json"
+    mode: "0644"
+  notify: Restart filebeat
+  become: yes
+
+- name: Installer le module Filebeat pour Wazuh
+  ansible.builtin.shell: >
+    curl -s https://packages.wazuh.com/4.x/filebeat/wazuh-filebeat-0.4.tar.gz |
+    tar -xvz -C /usr/share/filebeat/module
+  args:
+    creates: "/usr/share/filebeat/module/wazuh"
+  become: yes
+
+- name: Vérifier la présence de l'archive des certificats
+  ansible.builtin.stat:
+    path: "/home/{{ user }}/wazuh-certificates.tar"
+  register: cert_archive
+
+- name: Échouer si le fichier est introuvable
+  ansible.builtin.fail:
+    msg: "Le fichier /home/{{ user }}/wazuh-certificates.tar est introuvable !"
+  when: not cert_archive.stat.exists
+
+- name: Créer le dossier /etc/filebeat/certs
+  ansible.builtin.file:
+    path: /etc/filebeat/certs
+    state: directory
+    owner: root
+    group: root
+    mode: "0500"
+  become: yes
+
+- name: Extraire les certificats depuis wazuh-certificates.tar
+  ansible.builtin.unarchive:
+    src: "/home/{{ user }}/wazuh-certificates.tar"
+    dest: /etc/filebeat/certs
+    remote_src: yes
+    extra_opts:
+      - --wildcards
+      - "./{{ wazuh_server_node }}.pem"
+      - "./{{ wazuh_server_node }}-key.pem"
+      - "./root-ca.pem"
+  become: yes
+
+- name: Renommer les certificats pour Filebeat
+  ansible.builtin.command:
+    cmd: mv -n /etc/filebeat/certs/{{ wazuh_server_node }}.pem /etc/filebeat/certs/filebeat.pem
+  become: yes
+
+- name: Renommer la clé privée dans Filebeat
+  ansible.builtin.command:
+    cmd: mv -n /etc/filebeat/certs/{{ wazuh_server_node }}-key.pem /etc/filebeat/certs/filebeat-key.pem
+  become: yes
+
+- name: Appliquer les permissions de sécurité
+  ansible.builtin.file:
+    path: "/etc/filebeat/certs/{{ item }}"
+    mode: "0400"
+    owner: root
+    group: root
+  loop:
+    - filebeat.pem
+    - filebeat-key.pem
+    - root-ca.pem
+  become: yes
+
+- name: Enregistrer l'utilisateur du Wazuh Indexer dans le keystore
+  ansible.builtin.shell: echo "{{ wazuh_indexer_username }}" | /var/ossec/bin/wazuh-keystore -f indexer -k username
+  become: yes
+
+- name: Enregistrer le mot de passe du Wazuh Indexer dans le keystore
+  ansible.builtin.shell: echo "{{ wazuh_indexer_password }}" | /var/ossec/bin/wazuh-keystore -f indexer -k password
+  become: yes
+
+- name: Sauvegarder l'ancienne configuration ossec.conf
+  ansible.builtin.copy:
+    src: /var/ossec/etc/ossec.conf
+    dest: /var/ossec/etc/ossec.conf.bak
+    remote_src: yes
+    mode: "0644"
+  become: yes
+
+- name: Modifier ossec.conf avec les bonnes informations d'indexer
+  ansible.builtin.template:
+    src: ossec.conf.j2
+    dest: /var/ossec/etc/ossec.conf
+    owner: root
+    group: wazuh
+    mode: "0640"
+  notify: Restart wazuh-manager
+  become: yes
+
+- name: Recharger systemd pour prendre en compte les nouveaux services
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Activer Wazuh Manager au démarrage
+  ansible.builtin.systemd:
+    name: wazuh-manager
+    enabled: yes
+  become: yes
+
+- name: Démarrer Wazuh Manager
+  ansible.builtin.systemd:
+    name: wazuh-manager
+    state: started
+  become: yes
+
+- name: Recharger systemd pour prendre en compte les nouveaux services
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Activer Filebeat au démarrage
+  ansible.builtin.systemd:
+    name: filebeat
+    enabled: yes
+  become: yes
+
+- name: Démarrer filebeat
+  ansible.builtin.systemd:
+    name: filebeat
+    state: started
+  become: yes
+
+- name: Installer le module Filebeat pour Wazuh
+  ansible.builtin.shell: >
+    curl -s https://packages.wazuh.com/4.x/filebeat/wazuh-filebeat-0.4.tar.gz |
+    tar -xvz -C /usr/share/filebeat/module
+  args:
+    creates: "/usr/share/filebeat/module/wazuh"
+  become: yes
+
+- name: Démarrer filebeat
+  ansible.builtin.systemd:
+    name: filebeat
+    state: restarted
+  become: yes

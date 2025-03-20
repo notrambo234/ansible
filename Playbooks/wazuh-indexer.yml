@@ -1,6 +1,0 @@
----
-- name: Installer et configurer Wazuh indexer
-  hosts: vm-wazuh
-  become: true
-  roles:
-       - wazuh-indexer

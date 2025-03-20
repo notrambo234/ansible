@@ -1,4 +1,0 @@
----
-wazuh_indexer_ip: "192.168.56.103"
-wazuh_manager_ip: "192.168.56.103"
-dashboard_node_ip: "192.168.56.103"

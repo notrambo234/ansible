@@ -6,10 +6,10 @@ MEMORY = "2048"
 CPU = "2"
 
 Vagrant.configure("2") do |config|
-  config.vm.define "node1" do |subconfig|
+  config.vm.define "node2" do |subconfig|
     subconfig.vm.box = BOX_IMAGE
-    subconfig.vm.hostname = "node1"
-	subconfig.vm.network :private_network, ip: "192.168.1.50"
+    subconfig.vm.hostname = "node2"
+	subconfig.vm.network :private_network, ip: "192.168.1.51"
 	subconfig.vm.provider :virtualbox do |vb|
           vb.customize ["modifyvm", :id, "--memory", MEMORY]
           vb.customize ["modifyvm", :id, "--cpus", CPU]

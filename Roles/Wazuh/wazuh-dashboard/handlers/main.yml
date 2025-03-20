@@ -1,2 +1,6 @@
 ---
-# handlers file for wazuh-dashboard
+- name: Restart wazuh-dashboard
+  ansible.builtin.service:
+    name: wazuh-dashboard
+    state: restarted
+    enabled: yes

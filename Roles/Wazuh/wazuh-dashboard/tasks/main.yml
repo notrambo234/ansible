@@ -1,2 +1,110 @@
 ---
-# tasks file for wazuh-dashboard
+- name: Installer les dépendances
+  ansible.builtin.apt:
+    name:
+      - debhelper
+      - tar
+      - curl
+      - libcap2-bin
+
+- name: Installer le wazuh-dashboard
+  ansible.builtin.apt:
+    name: wazuh-dashboard
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Modifier opensearch_dashboards.yml avec les bonnes informations d'indexer
+  ansible.builtin.template:
+    src: opensearch_dashboards.yml.j2
+    dest: /etc/wazuh-dashboard/opensearch_dashboards.yml
+    owner: wazuh-dashboard
+    group: wazuh-dashboard
+    mode: "0640"
+  notify: Restart wazuh-dashboard
+  become: yes
+
+- name: Créer le dossier /etc/wazuh-dashboard/certs
+  ansible.builtin.file:
+    path: /etc/wazuh-dashboard/certs
+    state: directory
+    owner: root
+    group: root
+    mode: "0500"
+  become: yes
+
+- name: Extraire les certificats depuis wazuh-certificates.tar
+  ansible.builtin.unarchive:
+    src: "/home/{{ user }}/wazuh-certificates.tar"
+    dest: /etc/wazuh-dashboard/certs
+    remote_src: yes
+    extra_opts:
+      - --wildcards
+      - "./{{ wazuh_dashboard_node }}.pem"
+      - "./{{ wazuh_dashboard_node }}-key.pem"
+      - "./root-ca.pem"
+  become: yes
+
+- name: Renommer les certificats pour dashboard
+  ansible.builtin.command:
+    cmd: mv -n /etc/wazuh-dashboard/certs/{{ wazuh_dashboard_node }}.pem /etc/wazuh-dashboard/certs/dashboard.pem
+  become: yes
+
+- name: Renommer la clé privée pour dashboard
+  ansible.builtin.command:
+    cmd: mv -n /etc/wazuh-dashboard/certs/{{ wazuh_dashboard_node }}-key.pem /etc/wazuh-dashboard/certs/dashboard-key.pem
+  become: yes
+
+- name: Appliquer les permissions de sécurité sur le dossier des certificats
+  ansible.builtin.file:
+    path: "/etc/wazuh-dashboard/certs"
+    mode: "0500"
+    owner: wazuh-dashboard
+    group: wazuh-dashboard
+    recurse: yes
+  become: yes
+  
+- name: Appliquer les permissions de sécurité
+  ansible.builtin.file:
+    path: "/etc/wazuh-dashboard/certs/{{ item }}"
+    mode: "0400"
+    owner: wazuh-dashboard
+    group: wazuh-dashboard
+  loop:
+    - dashboard.pem
+    - dashboard-key.pem
+    - root-ca.pem
+  become: yes
+
+- name: Recharger systemd pour prendre en compte les nouveaux services
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Activer Dashboard au démarrage
+  ansible.builtin.systemd:
+    name: wazuh-dashboard
+    enabled: yes
+  become: yes
+
+- name: Démarrer dashboard
+  ansible.builtin.systemd:
+    name: wazuh-dashboard
+    state: started
+  notify: Restart wazuh-dashboard
+  become: yes
+
+# - name: Commenter les lignes `deb` dans wazuh.list
+#   ansible.builtin.lineinfile:
+#     path: /etc/apt/sources.list.d/wazuh.list
+#     regexp: "^deb "
+#     line: "#deb "
+#     backrefs: yes
+#   become: yes
+#   when: ansible_os_family == "Debian"
+
+# - name: Mettre à jour la liste des paquets
+#   ansible.builtin.apt:
+#     update_cache: yes
+#   become: yes
+#   when: ansible_os_family == "Debian"

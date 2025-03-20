@@ -1,3 +1,3 @@
-# - name: Execute indexer-security-init.sh script
-#  ansible.builtin.command: /usr/share/wazuh-indexer/bin/indexer-security-init.sh
-#  become: true
+- name: Execute indexer-security-init.sh script
+  ansible.builtin.command: /usr/share/wazuh-indexer/bin/indexer-security-init.sh
+  become: true

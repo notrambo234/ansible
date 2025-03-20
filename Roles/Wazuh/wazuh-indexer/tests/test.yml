@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
-  remote_user: root
+- hosts: test
+  become: yes
   roles:
-    - wazuh-indexer
+    - Wazuh/wazuh-indexer

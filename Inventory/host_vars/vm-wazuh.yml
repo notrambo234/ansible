@@ -1,0 +1,4 @@
+---
+wazuh_version: "4.11"
+user: "vagrant"
+indexer_ip: "192.168.1.51"

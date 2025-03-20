@@ -1,125 +1,121 @@
-# - name: Installer les paquets nécessaires 
-#  ansible.builtin.apt:
-#     name:
-#       - debconf
-#       - adduser
-#       - procps
-#     state: present
-#     update-cache: true
-#  become: true
+- name: Installer les paquets nécessaires 
+  ansible.builtin.apt:
+     name:
+       - debconf
+       - adduser
+       - procps
+     state: present
+     update-cache: true
+  become: true
 
-# - name : Installer les paquets gnupg et apt-transport-https
-#  ansible.builtin.apt:
-#     name:
-#      - gnupg
-#      - apt-transport-https
-#     state: present
-#     update-cache: true
-#  become: true
+- name : Installer les paquets gnupg et apt-transport-https
+  ansible.builtin.apt:
+     name:
+      - gnupg
+      - apt-transport-https
+     state: present
+     update-cache: true
+  become: true
 
-# - name: Installer curl
-#  ansible.builtin.apt:
-#      name: curl
-#      state: present
-#  become: true
+- name: Installer curl
+  ansible.builtin.apt:
+      name: curl
+      state: present
+  become: true
 
-# - name: Installer la clé GPG de Wazuh
-#  ansible.builtin.shell:
-#    cmd: curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg
-#    creates: /usr/share/keyrings/wazuh.gpg
-#  become: true
+- name: Installer la clé GPG de Wazuh
+  ansible.builtin.shell:
+    cmd: curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg
+    creates: /usr/share/keyrings/wazuh.gpg
+  become: true
 
-# - name: ajouter le dépot wazuh
-#  ansible.builtin.lineinfile:
-#    path: /etc/apt/sources.list.d/wazuh.list
-#    line: "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main"
-#    create: true
-#  become: true
+- name: ajouter le dépot wazuh
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list.d/wazuh.list
+    line: "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main"
+    create: true
+  become: true
 
-# - name: Mettre à jour les informations de paquets
-#  ansible.builtin.apt:
-#    update_cache: true
-#  become: true
+- name: Mettre à jour les informations de paquets
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
 
-# - name: Installer wazuh-indexer
-#  ansible.builtin.apt:
-#    name: wazuh-indexer
-#    state: present
-#  become: true
+- name: Installer wazuh-indexer
+  ansible.builtin.apt:
+    name: wazuh-indexer
+    state: present
+  become: true
 
-# - name: Configuration opensearch.yml
-#  template:
-#     src: opensearch.yml.j2
-#     dest: /etc/wazuh-indexer/opensearch.yml
-#  become: true
+- name: Configuration opensearch.yml
+  template:
+     src: opensearch.yml.j2
+     dest: /etc/wazuh-indexer/opensearch.yml
+  become: true
 
-# - name: Create indexer certs directory
-#  ansible.builtin.file:
-#    path: /etc/wazuh-indexer/certs
-#    state: directory
-#    mode: '0500'
+- name: Create indexer certs directory
+  ansible.builtin.file:
+    path: /etc/wazuh-indexer/certs
+    state: directory
+    mode: '0500'
 
-#- name: Extract des certificats au répertoire certs
-#  ansible.builtin.command:
-#    cmd: "tar -xf ./wazuh-certificates.tar -C /etc/wazuh-indexer/certs/ ./{{ item }}"
-#  loop:
-#    - "node-1.pem"
-#    - "node-1-key.pem"
-#    - "admin.pem"
-#    - "admin-key.pem"
-#    - "root-ca.pem"
-#  become: true
+- name: Extract des certificats au répertoire certs
+  ansible.builtin.command:
+    cmd: "tar -xf ./wazuh-certificates.tar -C /etc/wazuh-indexer/certs/ ./{{ item }}"
+  loop:
+    - "node-1.pem"
+    - "node-1-key.pem"
+    - "admin.pem"
+    - "admin-key.pem"
+    - "root-ca.pem"
+  become: true
 
 
-# - name: Renommer le certificat node-1.pem à indexer.pem
-#  ansible.builtin.command:
-#      cmd: mv -n /etc/wazuh-indexer/certs/node-1.pem /etc/wazuh-indexer/certs/indexer.pem
-#  args:
-#      warn: false
-#  become: true
+- name: Renommer le certificat node-1.pem à indexer.pem
+  ansible.builtin.command:
+      cmd: mv -n /etc/wazuh-indexer/certs/node-1.pem /etc/wazuh-indexer/certs/indexer.pem
+  become: true
 
-# - name: Reonmmer le certificat node-1-key.pem à indexer-key.pem
-#  ansible.builtin.command:
-#      cmd: mv -n /etc/wazuh-indexer/certs/node-1-key.pem /etc/wazuh-indexer/certs/indexer-key.pem
-#  args:
-#      warn: false
-#  become: true
+- name: Reonmmer le certificat node-1-key.pem à indexer-key.pem
+  ansible.builtin.command:
+      cmd: mv -n /etc/wazuh-indexer/certs/node-1-key.pem /etc/wazuh-indexer/certs/indexer-key.pem
+  become: true
 
-# - name: Set directory permissions to 500
-#  ansible.builtin.file:
-#    path: /etc/wazuh-indexer/certs
-#    state: directory
-#    mode: '500'
+- name: Set directory permissions to 500
+  ansible.builtin.file:
+    path: /etc/wazuh-indexer/certs
+    state: directory
+    mode: '500'
 
-# - name: Set file permissions inside directory to 400
-#  ansible.builtin.find:
-#    paths: /etc/wazuh-indexer/certs
-#    file_type: file
-#  register: certs_files
+- name: Set file permissions inside directory to 400
+  ansible.builtin.find:
+    paths: /etc/wazuh-indexer/certs
+    file_type: file
+  register: certs_files
 
-# - name: Apply permission 400 to each file found
-#  ansible.builtin.file:
-#    path: "{{ item.path }}"
-#    mode: '400'
-#  with_items: "{{ certs_files.files }}"
+- name: Apply permission 400 to each file found
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: '400'
+  with_items: "{{ certs_files.files }}"
 
-# - name: Ensure wazuh-indexer owns the certs directory and its contents
-#  ansible.builtin.file:
-#    path: /etc/wazuh-indexer/certs
-#    owner: wazuh-indexer
-#    group: wazuh-indexer
-#    recurse: true
+- name: Ensure wazuh-indexer owns the certs directory and its contents
+  ansible.builtin.file:
+    path: /etc/wazuh-indexer/certs
+    owner: wazuh-indexer
+    group: wazuh-indexer
+    recurse: true
 
-# - name: Reload systemd daemon
-#  ansible.builtin.systemd:
-#    daemon_reload: true
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
 
-# - name: Enable wazuh-indexer service
-#  ansible.builtin.systemd:
-#    name: wazuh-indexer
-#    enabled: true
+- name: Enable wazuh-indexer service
+  ansible.builtin.systemd:
+    name: wazuh-indexer
+    enabled: true
 
-# - name: Start wazuh-indexer service
-#  ansible.builtin.systemd:
-#    name: wazuh-indexer
-#    state: started
+- name: Start wazuh-indexer service
+  ansible.builtin.systemd:
+    name: wazuh-indexer
+    state: started

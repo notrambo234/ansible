@@ -1,5 +1,4 @@
 ---
-indexer_ip: "192.168.56.103"
-manager_ip: "192.168.56.103"
-dashboard_ip: "192.168.56.103"
-wazuh_version: "4.7"
+indexer_ip: "192.168.0.23"
+wazuh_version: "4.11"
+user: "eboudi"

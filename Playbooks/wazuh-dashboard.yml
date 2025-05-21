@@ -1,6 +1,6 @@
 ---
 - name: Déploiement de Wazuh dashboard
-  hosts: proxmox
+  hosts: vagrant
   become: yes
   roles:
     - role: Roles/Wazuh/wazuh-dashboard
